@@ -1,93 +1,92 @@
-//your JS code here. If required.
-//your JS code here. If required.
-const quizData = [
-	{
-        question: "Which language runs in a web browser?",
-        a: "Java",
-        b: "C",
-        c: "Python",
-        d: "JavaScript",
-        correct: "d",
-    },
-    {
-        question: "What does CSS stand for?",
-        a: "Central Style Sheets",
-        b: "Cascading Style Sheets",
-        c: "Cascading Simple Sheets",
-        d: "Cars SUVs Sailboats",
-        correct: "b",
-    },
-    {
-        question: "What does HTML stand for?",
-        a: "Hypertext Markup Language",
-        b: "Hypertext Markdown Language",
-        c: "Hyperloop Machine Language",
-        d: "Helicopters Terminals Motorboats Lamborginis",
-        correct: "a",
-    },
-    {
-        question: "What year was JavaScript launched?",
-        a: "1996",
-        b: "1995",
-        c: "1994",
-        d: "none of the above",
-        correct: "b",
-    }
+const questions = [
+  {
+    question: "What is the capital of France?",
+    choices: ["Paris", "London", "Berlin", "Madrid"],
+    answer: "Paris",
+  },
+  {
+    question: "What is the highest mountain in the world?",
+    choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"],
+    answer: "Everest",
+  },
+  {
+    question: "What is the largest country by area?",
+    choices: ["Russia", "China", "Canada", "United States"],
+    answer: "Russia",
+  },
+  {
+    question: "Which is the largest planet in our solar system?",
+    choices: ["Earth", "Jupiter", "Mars"],
+    answer: "Jupiter",
+  },
+  {
+    question: "What is the capital of Canada?",
+    choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"],
+    answer: "Ottawa",
+  },
 ];
-const quiz= document.getElementById('quiz')
-const answerEls = document.querySelectorAll('.answer')
-const questionEl = document.getElementById('question')
-const a_text = document.getElementById('a_text')
-const b_text = document.getElementById('b_text')
-const c_text = document.getElementById('c_text')
-const d_text = document.getElementById('d_text')
-const submitBtn = document.getElementById('submit')
 
-const a_text = document.getElementById('a_text')
-let currentQuiz = 0;
-let score = 0;
+const submitButton = document.getElementById("submit");
+const questionsElement = document.getElementById("questions");
 
-const a_text = document.getElementById('a_text')
-loadQuiz()
-function loadQuiz() {
-	deselectAnswers()
-	const currentQuizData = quizData[currentQuiz]
+// Get the saved progress from session storage
+const savedProgress = JSON.parse(sessionStorage.getItem("progress"));
+// Submit the quiz and show the score
+submitButton.addEventListener("click", showScore);
 
-const a_text = document.getElementById('a_text')
-	questionE1.innerText = currentQuizData.question
-	a_text.innerText = currentQuizData.a
-	b_text.innerText = currentQuizData.b
-	c_text.innerText = currentQuizData.c
-	d_text.innerText = currentQuizData.d
+// If there is saved progress, use it. Otherwise, start from the beginning.
+let userAnswers = savedProgress ? savedProgress : [];
+
+// Display the quiz questions and choices
+function renderQuestions() {
+  for (let i = 0; i < questions.length; i++) {
+    const question = questions[i];
+    const questionElement = document.createElement("div");
+    const questionText = document.createTextNode(question.question);
+    questionElement.appendChild(questionText);
+    for (let j = 0; j < question.choices.length; j++) {
+      const choice = question.choices[j];
+      const choiceElement = document.createElement("input");
+      choiceElement.setAttribute("type", "radio");
+      choiceElement.setAttribute("name", `question-${i}`);
+      choiceElement.setAttribute("value", choice);
+      if (userAnswers[i] === choice) {
+        choiceElement.setAttribute("checked", true);
+      }
+      const choiceText = document.createTextNode(choice);
+      questionElement.appendChild(choiceElement);
+      questionElement.appendChild(choiceText);
+    }
+    questionsElement.appendChild(questionElement);
+  }
 }
-function deselectAnswers(){
-	answerEls.forEach(answerEl => answerEls.checked = false)
+
+// Save the user's answer when they select a choice
+function saveAnswers() {
+  const choiceElements = document.querySelectorAll("input[type=radio]");
+  for (let i = 0; i < choiceElements.length; i++) {
+    const choiceElement = choiceElements[i];
+    choiceElement.addEventListener("change", function (event) {
+      const answer = event.target.value;
+      userAnswers[parseInt(event.target.name.split("-")[1], 10)] = answer;
+      sessionStorage.setItem("progress", JSON.stringify(userAnswers));
+    });
+  }
 }
-function  getSelected(){
-	let answerEl
-	answerEls.forEach(answerEl =>){
-		if(answerEl.checked){
-			answer = answerEl.id
-		}
-	}
-					  return answer
+
+function showScore() {
+  let score = 0;
+  for (let i = 0; i < questions.length; i++) {
+    const question = questions[i];
+    const userAnswer = userAnswers[i];
+    if (userAnswer === question.answer) {
+      score++;
+    }
+  }
+  localStorage.setItem("score", score);
+  const scoreElement = document.getElementById("score");
+  scoreElement.innerText = `Your score is ${score} out of ${questions.length}.`;
 }
-submitBtn.addEventListener('click', () => {
-	const answer = getSelected()
-	if(answer){
-		if (answer == quizData[currentQuiz].correct){
-			score++
-		}
-		currentQuiz++
-		if(currentQuiz < quizData.length){
-			loadQuiz()
-		}
-		else{
-			quiz.innerHtml ='
-				<h2>You answered ${score}/${quizData.length} questions correctly</h2>
-				button oneclick="location.reload()">Reload</button>
-				'
-		}
-	}
-}
-	)
+
+renderQuestions();
+saveAnswers();
